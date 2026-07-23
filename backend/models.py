@@ -1,9 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy import ForeignKey
-
-Base = declarative_base()
+from database import Base
 
 
 class Internship(Base):
@@ -34,3 +30,19 @@ class Application(Base):
     url = Column(String)
 
     status = Column(String)
+
+
+class Job(Base):
+    __tablename__ = "jobs"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    company = Column(String, nullable=False)
+
+    title = Column(String, nullable=False)
+
+    location = Column(String)
+
+    url = Column(String, nullable=False, unique=True)
+
+    skills = Column(String)

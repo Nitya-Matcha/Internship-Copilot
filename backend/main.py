@@ -10,6 +10,13 @@ import json
 from fastapi.middleware.cors import CORSMiddleware
 from models import Application
 from database import SessionLocal
+from database import engine
+from database import Base
+from models import Job
+from database import SessionLocal
+from models import Resume, Job
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -87,44 +94,53 @@ async def match_resume(file: UploadFile = File(...)):
     return matches
 
 @app.post("/ai-match")
-async def ai_match(file: UploadFile = File(...)):
+async def ai_match(
+    file: UploadFile = File(...)
+):
 
-    contents = await file.read()
+    # Extract resume text
+    resume_text = extract_resume_text(file)
 
-    with open("resume.pdf", "wb") as f:
-        f.write(contents)
 
-    resume_text = extract_resume_text("resume.pdf")
-
+    # Open database connection
     db = SessionLocal()
 
-    applied = db.query(Application).all()
 
-    applied_urls = [
-        app.url
-        for app in applied
-        
-    ]
+    # Get internships from database
+    jobs = db.query(Job).all()
+
+
+    # Convert SQLAlchemy objects into dictionaries
+    job_list = []
+
+
+    for job in jobs:
+
+        job_list.append({
+
+            "company": job.company,
+
+            "title": job.title,
+
+            "location": job.location,
+
+            "url": job.url
+
+        })
+
 
     db.close()
 
 
-    jobs = get_all_internships()
 
-
-    # Remove already applied internships
-    jobs = [
-        job for job in jobs
-        if job["url"] not in applied_urls
-    ]
-
-
-    results = ai_match_resume(
+    # Send jobs + resume to AI
+    matches = ai_match_resume(
         resume_text,
-        jobs
+        job_list
     )
 
-    return results
+
+    return matches
 
 @app.get("/test-internships")
 def test_internships():
@@ -153,3 +169,12 @@ def apply(job: dict):
     return {
         "message": "Application saved"
     }
+
+@app.get("/jobs")
+def get_jobs():
+
+    db = SessionLocal()
+
+    jobs = db.query(Job).all()
+
+    return jobs
