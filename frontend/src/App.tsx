@@ -27,7 +27,7 @@ function App() {
 
 
         const response = await axios.post(
-            "http://127.0.0.1:8000/ai-match",
+            "https://internship-copilot.onrender.com/ai-match",
             formData,
             {
                 headers:{
@@ -87,7 +87,7 @@ function App() {
 
             // Save application
             await axios.post(
-                "http://127.0.0.1:8000/apply",
+                "https://internship-copilot.onrender.com/apply",
                 {
                     
                     company: job.company,
