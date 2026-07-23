@@ -5,6 +5,7 @@ from database import SessionLocal
 from models import Job
 
 from job_skill_extractor import extract_job_skills
+import re
 
 
 # Greenhouse companies
@@ -99,7 +100,7 @@ def fetch_greenhouse_jobs(company, board):
 
 
         # Internship filter
-        if "intern" not in title.lower():
+        if not re.search(r"\bintern(ship)?\b", title.lower()):
             continue
 
 
@@ -143,7 +144,8 @@ def fetch_greenhouse_jobs(company, board):
             ]
 
 
-
+        print("ADDING:", title)
+        
         jobs.append({
 
             "company": company,
@@ -205,7 +207,7 @@ def fetch_lever_jobs(company, board):
         )
 
 
-        if "intern" not in title.lower():
+        if not re.search(r"\bintern(ship)?\b", title.lower()):
             continue
 
 

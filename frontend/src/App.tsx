@@ -2,23 +2,34 @@ import { useState } from "react";
 import axios from "axios";
 import InternshipCard from "./components/InternshipCard";
 
+
 function App() {
 
     const [file, setFile] = useState<File | null>(null);
+
     const [matches, setMatches] = useState<any[]>([]);
+
+    const [skills, setSkills] = useState<string[]>([]);
+
     const [loading, setLoading] = useState(false);
+
     const [applying, setApplying] = useState(false);
+
     const [error, setError] = useState("");
 
 
+
     async function getMatches() {
+
 
         if (!file) {
             return;
         }
 
 
+
         const formData = new FormData();
+
 
         formData.append(
             "file",
@@ -26,14 +37,25 @@ function App() {
         );
 
 
+
         const response = await axios.post(
-            "https://internship-copilot.onrender.com/ai-match",
+
+            "https://internship-copilot.onrender.com/recommend-jobs",
+
             formData,
+
             {
                 headers:{
                     "Content-Type":"multipart/form-data",
                 },
             }
+
+        );
+
+
+
+        setSkills(
+            response.data.skills || []
         );
 
 
@@ -41,39 +63,63 @@ function App() {
             response.data.matches || []
         );
 
+
     }
+
+
 
 
 
     async function uploadResume() {
 
+
         if (!file) {
-            setError("Please select a resume first.");
+
+            setError(
+                "Please select a resume first."
+            );
+
             return;
+
         }
 
 
+
         setLoading(true);
+
         setError("");
+
 
 
         try {
 
+
             await getMatches();
+
 
 
         } catch(err) {
 
+
             console.error(err);
-            setError("Failed to analyze resume.");
+
+            setError(
+                "Failed to analyze resume."
+            );
+
 
         } finally {
 
+
             setLoading(false);
+
 
         }
 
+
     }
+
+
 
 
 
@@ -82,65 +128,95 @@ function App() {
 
         try {
 
+
             setApplying(true);
 
 
-            // Save application
+
             await axios.post(
+
                 "https://internship-copilot.onrender.com/apply",
+
                 {
-                    
+
                     company: job.company,
+
                     title: job.title,
+
                     url: job.url
+
                 }
+
             );
 
 
 
-            // Immediately remove card
-            setMatches((previous)=> 
-                previous.filter(
-                    (item)=>item.url !== job.url
-                )
+
+            setMatches(
+
+                previous =>
+
+                    previous.filter(
+
+                        item => item.url !== job.url
+
+                    )
+
             );
 
 
 
-            // Generate replacement internship
+
             await getMatches();
 
 
 
         } catch(err) {
 
+
             console.error(err);
-            alert("Failed to save application.");
+
+            alert(
+                "Failed to save application."
+            );
+
 
         } finally {
 
+
             setApplying(false);
 
+
         }
+
 
     }
 
 
 
+
+
     return (
 
+
         <div className="min-h-screen bg-gray-100 p-8">
+
 
             <div className="max-w-5xl mx-auto">
 
 
+
                 <h1 className="text-4xl font-bold mb-6">
+
                     Internship Copilot
+
                 </h1>
 
 
 
+
                 <div className="bg-white p-6 rounded-xl shadow-md">
+
 
 
                     <input
@@ -151,13 +227,19 @@ function App() {
 
                         onChange={(e)=>{
 
+
                             if(e.target.files?.[0]){
 
+
                                 setFile(
+
                                     e.target.files[0]
+
                                 );
 
+
                             }
+
 
                         }}
 
@@ -165,37 +247,60 @@ function App() {
 
 
 
+
                     <button
+
 
                         onClick={uploadResume}
 
+
                         disabled={loading}
+
 
                         className="ml-4 px-5 py-2 rounded-lg bg-black text-white disabled:opacity-50"
 
+
+
                     >
 
+
                         {
+
                             loading
+
                             ?
-                            "Analyzing..."
+
+                            "Finding Matches..."
+
                             :
-                            "Analyze Resume"
+
+                            "Find Internships"
+
                         }
+
 
 
                     </button>
 
 
 
+
                     {
+
+
                         error && (
 
+
                             <p className="text-red-500 mt-3">
+
                                 {error}
+
                             </p>
 
+
                         )
+
+
                     }
 
 
@@ -206,7 +311,67 @@ function App() {
 
 
 
+                {
+
+
+                    skills.length > 0 && (
+
+
+                        <div className="mt-8 bg-white p-6 rounded-xl shadow-md">
+
+
+                            <h2 className="text-2xl font-bold mb-3">
+
+                                Your Skills
+
+                            </h2>
+
+
+
+                            <div className="flex flex-wrap gap-2">
+
+
+                                {
+
+                                    skills.map(skill=>(
+
+
+                                        <span
+
+                                            key={skill}
+
+                                            className="px-3 py-1 bg-gray-200 rounded-full"
+
+                                        >
+
+                                            {skill}
+
+
+                                        </span>
+
+
+                                    ))
+
+                                }
+
+
+                            </div>
+
+
+                        </div>
+
+
+                    )
+
+
+                }
+
+
+
+
+
                 <div className="mt-8">
+
 
 
                     <h2 className="text-2xl font-bold mb-4">
@@ -219,7 +384,10 @@ function App() {
 
 
                     {
+
+
                         applying && (
+
 
                             <p className="text-blue-600 mb-3">
 
@@ -227,24 +395,35 @@ function App() {
 
                             </p>
 
+
                         )
+
+
                     }
+
 
 
 
 
                     {
+
+
                         !loading && matches.length === 0 && (
+
 
                             <p className="text-gray-500">
 
+
                                 Upload your resume to receive internship recommendations.
+
 
                             </p>
 
-                        )
-                    }
 
+                        )
+
+
+                    }
 
 
 
@@ -253,37 +432,49 @@ function App() {
 
 
                         {
+
+
                             matches.map((job,index)=>(
 
 
                                 <InternshipCard
 
+
                                     key={job.url || index}
+
 
                                     job={job}
 
+
                                     markApplied={markApplied}
+
 
                                 />
 
 
                             ))
+
                         }
 
 
                     </div>
 
 
+
                 </div>
+
 
 
 
             </div>
 
 
+
         </div>
 
+
     );
+
 
 }
 

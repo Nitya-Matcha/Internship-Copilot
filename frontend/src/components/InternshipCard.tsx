@@ -79,7 +79,7 @@ export default function InternshipCard({
 
 
             {
-                job.missing_skills.length > 0 && (
+                (job.missing_skills || []).length > 0 && (
 
                     <div className="mt-3">
 
