@@ -14,11 +14,12 @@ from database import SessionLocal
 app = FastAPI()
 
 app.add_middleware(
-    CORSMiddleware,
+        CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "https://internship-copilot-test1-nc412kb74-nitya5.vercel.app"
+        "https://internship-copilot-test1.vercel.app/",
+        "http://localhost:5173"
     ],
+    
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
