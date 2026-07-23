@@ -1,4 +1,4 @@
-_from database import SessionLocal
+from database import SessionLocal
 from job_collector import collect_jobs
 from models import Job
 
