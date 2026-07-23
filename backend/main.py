@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Depends
 from resume_parser import extract_resume_text
 from ai_analyzer import analyze_resume
 from matcher import match_resume_to_jobs
@@ -13,8 +13,12 @@ from database import SessionLocal
 from database import engine
 from database import Base
 from models import Job
-from database import SessionLocal
+from database import SessionLocal, get_db
 from models import Resume, Job
+from sqlalchemy.orm import Session
+from job_matcher import match_jobs
+from ai_analyzer import analyze_resume
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -95,52 +99,35 @@ async def match_resume(file: UploadFile = File(...)):
 
 @app.post("/ai-match")
 async def ai_match(
-    file: UploadFile = File(...)
+    file: UploadFile,
+    db: Session = Depends(get_db)
 ):
 
-    # Extract resume text
-    resume_text = extract_resume_text(file)
-
-
-    # Open database connection
-    db = SessionLocal()
-
-
-    # Get internships from database
-    jobs = db.query(Job).all()
-
-
-    # Convert SQLAlchemy objects into dictionaries
-    job_list = []
-
-
-    for job in jobs:
-
-        job_list.append({
-
-            "company": job.company,
-
-            "title": job.title,
-
-            "location": job.location,
-
-            "url": job.url
-
-        })
-
-
-    db.close()
-
-
-
-    # Send jobs + resume to AI
-    matches = ai_match_resume(
-        resume_text,
-        job_list
+    resume_text = extract_resume_text(
+        file.file
     )
 
 
-    return matches
+    analysis = analyze_resume(
+        resume_text
+    )
+
+
+    skills = analysis["skills"]
+
+
+    jobs = db.query(Job).all()
+
+
+    matches = match_jobs(
+        skills,
+        jobs
+    )
+
+
+    return {
+        "matches": matches
+    }
 
 @app.get("/test-internships")
 def test_internships():
