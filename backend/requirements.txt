@@ -32,7 +32,7 @@ python-multipart==0.0.32
 PyYAML==6.0.3
 requests==2.34.2
 rich==15.0.0
-openai==1.38.2
+openai
 rich-toolkit==0.20.1
 rignore==0.7.6
 sentry-sdk==2.64.0
