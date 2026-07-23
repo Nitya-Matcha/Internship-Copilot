@@ -179,14 +179,11 @@ def save_jobs(jobs):
 
 def collect_jobs():
 
-
-    all_jobs=[]
-
+    all_jobs = []
 
     print("Collecting Greenhouse jobs...")
 
-
-    for company,board in GREENHOUSE_BOARDS.items():
+    for company, board in GREENHOUSE_BOARDS.items():
 
         jobs = fetch_greenhouse_jobs(
             company,
@@ -195,12 +192,9 @@ def collect_jobs():
 
         all_jobs.extend(jobs)
 
-
-
     print("Collecting Lever jobs...")
 
-
-    for company,board in LEVER_BOARDS.items():
+    for company, board in LEVER_BOARDS.items():
 
         jobs = fetch_lever_jobs(
             company,
@@ -209,14 +203,13 @@ def collect_jobs():
 
         all_jobs.extend(jobs)
 
-
-
     print(
         f"Found {len(all_jobs)} internships"
     )
 
-
     save_jobs(all_jobs)
+
+    return all_jobs
 
 
 
