@@ -18,6 +18,10 @@ from models import Resume, Job
 from sqlalchemy.orm import Session
 from job_matcher import match_jobs
 from ai_analyzer import analyze_resume
+from resume_skill_extractor import extract_resume_skills
+from job_matcher import match_jobs
+from models import Job
+from database import SessionLocal
 
 
 Base.metadata.create_all(bind=engine)
@@ -165,3 +169,22 @@ def get_jobs():
     jobs = db.query(Job).all()
 
     return jobs
+
+@app.post("/recommend-jobs")
+async def recommend_jobs(file: UploadFile = File(...)):
+
+    resume_text = extract_resume_text(file.file)
+
+    skills = extract_resume_skills(resume_text)
+
+    db = SessionLocal()
+
+    jobs = db.query(Job).all()
+
+    matches = match_jobs(skills, jobs)
+
+    db.close()
+
+    return {
+        "matches": matches
+    }
